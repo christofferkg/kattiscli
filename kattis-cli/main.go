@@ -1,33 +1,43 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 const (
 	openKattisPath = "https://open.kattis.com/problems/"
+	samplesPath    = "file/statement/samples.zip"
 )
 
 func main() {
-	fmt.Println(GetProblemById("cold"))
+	DownloadSamples("cold")
 }
 
-func GetProblemById(id string) string {
-	resp, err := http.Get(openKattisPath + id)
-
+func DownloadSamples(id string) {
+	resp, err := http.Get(openKattisPath + id + "/" + samplesPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	return string(body)
+	out, err := os.Create(wd + "/samples.zip")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
