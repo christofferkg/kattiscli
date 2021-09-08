@@ -13,7 +13,36 @@ const (
 )
 
 func main() {
-	DownloadSamples("cold")
+	InitProblem(os.Args[1])
+}
+
+func InitProblem(id string) {
+	CreateDirectory(id)
+	CreateWorkFile(id)
+	DownloadSamples(id)
+
+}
+
+func CreateWorkFile(id string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = os.Create(wd + "/" + id + "/main.go")
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func CreateDirectory(id string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Set the pemissions to rwe with 0755
+	os.Mkdir(wd+"/"+id, 0755)
 }
 
 func DownloadSamples(id string) {
@@ -29,7 +58,7 @@ func DownloadSamples(id string) {
 		log.Fatalln(err)
 	}
 
-	out, err := os.Create(wd + "/samples.zip")
+	out, err := os.Create(wd + "/" + id + "/samples.zip")
 	if err != nil {
 		log.Fatalln(err)
 	}
