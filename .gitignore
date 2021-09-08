@@ -1,6 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/linux,go,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=linux,go,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/linux,visualstudiocode,go
+# Edit at https://www.toptal.com/developers/gitignore?templates=linux,visualstudiocode,go
 
 ### Go ###
 # Binaries for programs and plugins
@@ -54,4 +54,4 @@
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/linux,go,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/linux,visualstudiocode,go
