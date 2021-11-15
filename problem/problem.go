@@ -1,6 +1,7 @@
 package problem
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,57 +13,81 @@ const (
 	SamplesPath    = "file/statement/samples.zip"
 )
 
-func InitProblem(id string) {
-	createDirectory(id)
-	createWorkFile(id)
-	downloadSamples(id)
+var (
+	Language = "go"
+)
 
+// Get problem creates a directory for the problem, a main file for the
+// solution, and downloads the samples into a samples.zip
+func GetProblem(id string) {
+	mkProblemSpace(id)
+	mkSamples(id)
 }
 
-func createDirectory(id string) {
+func mkDir(name string) error {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
-	// Set the pemissions to rwe with 0755
-	os.Mkdir(wd+"/"+id, 0755)
+	// Set the pemissions to read-write-execute with 0755
+	err = os.Mkdir(wd+"/"+name, 0755)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func createWorkFile(id string) {
-	wd, err := os.Getwd()
+func mkFile(name string, extension string) (*os.File, error) {
+	file, err := os.Create(fmt.Sprintf("%s.%s", name, extension))
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
-	_, err = os.Create(wd + "/" + id + "/main.go")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	return file, nil
 }
 
-func downloadSamples(id string) {
-	resp, err := http.Get(OpenKattisPath + id + "/" + SamplesPath)
+// mkProblemSpace prepares a diretory for the problem by creating a main file,
+func mkProblemSpace(id string) error {
+	err := mkDir(id)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
-	defer resp.Body.Close()
-
-	wd, err := os.Getwd()
+	err = os.Chdir(id)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
-	out, err := os.Create(wd + "/" + id + "/samples.zip")
+	_, err = mkFile("main", Language)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
+	return nil
+}
+
+func DownloadSamples(id string) io.ReadCloser {
+	resp, err := http.Get(fmt.Sprintf("%s%s/%s", OpenKattisPath, id, SamplesPath))
+	if err != nil {
+		log.Fatalf("Failed to download samples: %v", err)
+	}
+	return resp.Body
+}
+
+func mkSamples(id string) {
+	samples := DownloadSamples(id)
+	defer samples.Close()
+
+	out, err := mkFile("samples", "zip")
+	if err != nil {
+		log.Fatalf("Failed to create the 'samples.zip': %v", err)
+	}
 	defer out.Close()
 
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(out, samples)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Failed to write samples to 'samples.zip': %v", err)
 	}
 }
